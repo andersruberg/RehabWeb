@@ -1,0 +1,54 @@
+<%--
+Default skin template. The following skins are provided as examples only.
+
+1. Named control skin. The SkinId should be uniquely defined because
+   duplicate SkinId's per control type are not allowed in the same theme.
+
+<asp:GridView runat="server" SkinId="gridviewSkin" BackColor="White" >
+   <AlternatingRowStyle BackColor="Blue" />
+</asp:GridView>
+
+2. Default skin. The SkinId is not defined. Only one default 
+   control skin per control type is allowed in the same theme.
+
+<asp:Image runat="server" ImageUrl="~/images/image1.jpg" />
+--%>
+<%@ Register Assembly="MyWebDataGrid" Namespace="MyWebDataGrid" TagPrefix="cc2" %>
+<%@ Register Namespace="DayPilot.Web.Ui" TagPrefix="DayPilot" %>
+
+<asp:GridView runat="server" 
+BorderStyle="Solid" BorderWidth="2px" 
+Font-Names="Arial" GridLines="Horizontal">
+<RowStyle HorizontalAlign="Left" Wrap="False" />
+<HeaderStyle HorizontalAlign="Left"/>
+</asp:GridView>
+
+<cc2:HighlightDataGrid runat="server" BackColor="#C00000"
+BorderStyle="Solid" BorderWidth="2px" 
+CellPadding="5" Font-Names="Arial" ForeColor="black" GridLines="Horizontal"
+RowHighlightColor="#284E98" RowForeColor="#FFFFFF">
+<EmptyDataRowStyle BackColor="White"/>
+<RowStyle HorizontalAlign="Left" Wrap="False" BackColor="#B5C7DE"/>
+<EditRowStyle BackColor="Red" Font-Names="Arial" ForeColor="Black" />
+<HeaderStyle BackColor="Green" Font-Names="Arial" Font-Bold="true" />
+<SelectedRowStyle Font-Bold="True"/>
+</cc2:HighlightDataGrid>
+
+<asp:Button runat="server" BackColor="White" 
+BorderColor="#507CD1" BorderStyle="Solid" 
+BorderWidth="1px" Font-Names="Verdana"
+Font-Size="0.9em" ForeColor="#284E98" />
+
+ <DayPilot:DayPilotCalendar runat="server" BackColor="#FFFFD5"
+        BorderColor="#000000" BusinessBeginsHour="8" BusinessEndsHour="17" DataEndField="enddatetime"
+        DataStartField="startdatetime" DataTextField="title" DataValueField="bookingid" MobilephoneField="mobilephone" 
+        BookingtypeField="bookingtype" NoteField="note" PersonnumberField="personnumber" NotShownField="notshown"
+        FreecarddateField="freecarddate" ArrivedField="arrived" DayFontFamily="Tahoma" DayFontSize="12pt"
+        EventBackColor="#FFFFFF" EventBorderColor="#000000" EventFontFamily="Tahoma"
+        EventFontSize="12pt" EventHoverColor="#DCDCDC" EventLeftBarColor="Blue" HourBorderColor="#EAD098"
+        HourFontFamily="Tahoma" HourFontSize="16pt" HourHalfBorderColor="#F3E4B1" HourNameBackColor="#ECE9D8"
+        HourNameBorderColor="#ACA899" HoverColor="#FFED95" NonBusinessBackColor="Silver"
+        EventArrivedBackColor="0, 192, 0" EventNotShownBackColor="64, 64, 64" EventFreecardExpiredBackColor="Red"
+        StartDate="2007-08-19" Style="position: relative" TimeFormat="Clock24Hours" Width="100%"
+        HeaderHeight="30" HourHeight="80" JavaScriptFreeAction="newBooking('{0}','{1}');" 
+        JavaScriptEventAction="showBookingInfo('{0}');" />

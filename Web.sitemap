@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<siteMap xmlns="http://schemas.microsoft.com/AspNet/SiteMap-File-1.0" >
+  <siteMapNode url="Secure/Patients.aspx" title="Patientregister"  description="Visa patientregistret">
+    <siteMapNode url="Secure/Bookings_pilot.aspx" title="Tidbokning" description="Visa dagsvy" >
+    </siteMapNode>
+    <siteMapNode url="Logout.aspx" title="Logga ut"  description="Logga ut från siten">
+    </siteMapNode>
+  </siteMapNode>
+</siteMap>

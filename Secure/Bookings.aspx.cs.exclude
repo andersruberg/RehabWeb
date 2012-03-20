@@ -1,0 +1,400 @@
+using System;
+using System.Data;
+using System.Configuration;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Web.UI.HtmlControls;
+
+
+public partial class _Default : System.Web.UI.Page 
+{
+    
+    /*
+     * To keep track of the selected time
+     * 
+     */
+    private Common.CenteredDateTime currentDate;
+    
+    #region Properties
+
+    /*
+     * To be able to keep the selected patient when making a new booking
+     */
+    private int SelectedPatientId
+    {
+        get
+        {
+            int? id = (int?)ViewState["SelectedPatientId"];
+            if (id.HasValue)
+                return id.Value;
+            else
+                return -1;
+        }
+        set
+        {
+            ViewState["SelectedPatientId"] = value;
+            
+        }
+    }
+
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+
+        if (!Page.IsPostBack)
+        {
+            currentDate = new Common.CenteredDateTime(ViewState, DateTime.Now);
+
+            DropDownList starttimeDropDownList = (DropDownList)FormView1.Row.FindControl("starttimeDropDownList");
+            DropDownList endtimeDropDownList = (DropDownList)FormView1.Row.FindControl("endtimeDropDownList");
+            SetupTimeSelection(starttimeDropDownList);
+            SetupTimeSelection(endtimeDropDownList);
+
+            GridView1.DataBind();
+            
+        }
+        else
+            currentDate = new Common.CenteredDateTime(ViewState, (DateTime)ViewState["CurrentDate"]);
+
+        
+    }
+
+    protected void Page_PreRender(object sender, EventArgs e)
+    {
+        //Update controls with the current date
+        LabelDate.Text = currentDate.CurrentDate.ToShortDateString();
+
+        KMobile.Web.UI.WebControls.DateTimePicker dateTimePicker = (KMobile.Web.UI.WebControls.DateTimePicker)FormView1.Row.FindControl("DateTimePicker1");
+        dateTimePicker.Value = currentDate.CurrentDate;
+    }
+
+    #endregion
+
+ 
+    
+
+    #region Setup controls
+    protected void SetupTimeSelection(DropDownList dropDownList)
+    {
+        DataTable dt = new DataTable();
+        dt.Columns.Add("TimeString", typeof(string));
+        dt.Columns.Add("TimeValue", typeof(string));
+
+        DateTime start = new DateTime(1970, 1, 1, 8, 0, 0);
+        for (int i = 0; i < 19; i++)
+        {
+            DataRow dr = dt.NewRow();
+            dr["TimeString"] = start.ToShortTimeString();
+            dr["TimeValue"] = start.ToShortTimeString();
+            dt.Rows.Add(dr);
+            start = start.AddMinutes(30);
+        }
+
+        dropDownList.DataSource = dt.DefaultView;
+        dropDownList.DataTextField = "TimeString";
+        dropDownList.DataValueField = "TimeValue";
+        dropDownList.DataBind();
+
+    }
+
+#endregion
+
+    #region Handle control events
+
+    protected void GridView1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+       
+        ObjectDataSource2.Select();
+ 
+    }
+
+    protected void NextDay_Click(object sender, EventArgs e)
+    {
+        currentDate.SetNextDay();
+       
+
+        GridView1.SelectedIndex = -1;
+        GridView1.DataBind();
+        
+        
+        
+    }
+    protected void PreviousDay_Click(object sender, EventArgs e)
+    {
+        currentDate.SetPreviousDay();
+       
+
+        GridView1.SelectedIndex = -1;
+        GridView1.DataBind();
+
+    }
+
+    protected void btnBook_Click(object sender, EventArgs e)
+    {
+        
+        ObjectDataSource1.Insert();
+
+    }    
+    
+    
+
+    protected void lupChoosePatient_Selected(object sender, EventArgs e)
+    {
+        string selectedPatientFirstname;
+        string selectedPatientSurname;
+        string selectedPatientPersonnumber;
+        
+        KMobile.Web.UI.WebControls.Lookup lupChoosePatient = (KMobile.Web.UI.WebControls.Lookup)FormView1.Row.FindControl("lupChoosePatient");
+        SelectedPatientId = (int)lupChoosePatient.Result;
+
+        ObjectDataSource selectedPatientObjectDataSource = new ObjectDataSource("PatientsBLL", "GetPatientsByID");
+        selectedPatientObjectDataSource.SelectParameters.Add("patientid", SelectedPatientId.ToString());
+        DataView selectedPatientDataView = (DataView)selectedPatientObjectDataSource.Select();
+        DataRow selectedPatientDataRow = (DataRow)selectedPatientDataView[0].Row;
+        selectedPatientFirstname = (string)selectedPatientDataRow["firstname"];
+        selectedPatientSurname = (string)selectedPatientDataRow["surname"];
+        selectedPatientPersonnumber = (string)selectedPatientDataRow["personnumber"];
+        
+        TextBox titleTextBox = (TextBox)FormView1.Row.FindControl("titleTextBox");
+        titleTextBox.Text = selectedPatientSurname + " " + selectedPatientFirstname;
+        TextBox personnumberTextBox = (TextBox)FormView1.Row.FindControl("personnumberTextBox");
+        personnumberTextBox.Text = selectedPatientPersonnumber;
+
+        //Keep the collapsible panel expended when page is doing postback
+        CollapsiblePanel1.State = KMobile.Web.UI.WebControls.PanelState.Expanded;
+        
+    }
+
+    #endregion
+
+    
+    protected void btnPreMonth_Click(object sender, EventArgs e)
+    {
+        
+        
+    }
+
+    protected void btnNxtMonth_Click(object sender, EventArgs e)
+    {
+        
+
+        
+    }
+    protected void ObjectDataSource1_Selecting(object sender, ObjectDataSourceSelectingEventArgs e)
+    {
+        
+       e.InputParameters["date"] = currentDate.CurrentDate;
+                         
+       SelectedBookingFormView.DataBind();
+        
+    }
+    protected void ObjectDataSource2_Inserting(object sender, ObjectDataSourceMethodEventArgs e)
+    {
+
+        
+        //Old..?
+        /*KMobile.Web.UI.WebControls.DateTimePicker date = (KMobile.Web.UI.WebControls.DateTimePicker)FormView1.Row.FindControl("DateTimePicker1");
+        DateTime startDate = date.Value;
+        TextBox txtStartTime = (TextBox)FormView1.Row.FindControl("startdatetimeTextBox");
+        TextBox txtEndTime = (TextBox)FormView1.Row.FindControl("enddatetimeTextBox");
+        DateTime startTime = DateTime.Parse(txtStartTime.Text);
+        DateTime startDateTime = (startDate.AddHours(startTime.Hour)).AddMinutes(startTime.Minute);
+
+        DateTime endTime = DateTime.Parse(txtEndTime.Text);
+        DateTime endDateTime = (startDate.AddHours(endTime.Hour)).AddMinutes(endTime.Minute);*/
+
+        KMobile.Web.UI.WebControls.DateTimePicker dateTimePicker = (KMobile.Web.UI.WebControls.DateTimePicker)FormView1.Row.FindControl("DateTimePicker1");
+        DateTime date = dateTimePicker.Value;
+        DropDownList starttimeDropDownList = (DropDownList)FormView1.Row.FindControl("starttimeDropDownList");
+        DateTime startTime = DateTime.Parse(starttimeDropDownList.SelectedValue);
+        DropDownList endtimeDropDownList = (DropDownList)FormView1.Row.FindControl("endtimeDropDownList");
+        DateTime endTime = DateTime.Parse(endtimeDropDownList.SelectedValue);
+
+        DateTime startDateTime = new DateTime(date.Year, date.Month, date.Day, startTime.Hour, startTime.Minute, 0);
+        DateTime endDateTime = new DateTime(date.Year, date.Month, date.Day, endTime.Hour, endTime.Minute, 0);
+
+
+        e.InputParameters["startdatetime"] = startDateTime.ToString();
+        e.InputParameters["enddatetime"] = endDateTime.ToString();
+
+        if (startDateTime > endDateTime)
+        {
+
+            e.Cancel = true;
+        }
+
+        KMobile.Web.UI.WebControls.Lookup lupChoosePatient = (KMobile.Web.UI.WebControls.Lookup)FormView1.Row.FindControl("lupChoosePatient");
+        
+        //This is neccessary if the page is postbacked during insertion of a new booking
+        int? id = (int?)lupChoosePatient.Result;
+        if (id.HasValue)
+            SelectedPatientId = id.Value;
+
+
+        string selectedPatientFirstname;
+        string selectedPatientSurname;
+        string selectedPatientPersonnumber;
+        
+        if (SelectedPatientId > 0)
+        {
+
+            ObjectDataSource selectedPatientObjectDataSource = new ObjectDataSource("PatientsBLL", "GetPatientsByID");
+            selectedPatientObjectDataSource.SelectParameters.Add("patientid", SelectedPatientId.ToString());
+            DataView selectedPatientDataView = (DataView)selectedPatientObjectDataSource.Select();
+            DataRow selectedPatientDataRow = (DataRow)selectedPatientDataView[0].Row;
+            e.InputParameters["patientid"] = (int)selectedPatientDataRow["patientid"];
+            selectedPatientSurname = (string)selectedPatientDataRow["surname"];
+            selectedPatientFirstname = (string)selectedPatientDataRow["firstname"];
+            e.InputParameters["title"] = selectedPatientSurname + " " + selectedPatientFirstname;
+
+        }
+        else
+        {
+            //TODO: Show an error text
+            e.Cancel = true;
+        }
+
+        DropDownList drpBookingType = (DropDownList)FormView1.Row.FindControl("drpBookingType");
+        e.InputParameters["bookingtypeid"] = drpBookingType.SelectedValue;
+
+        TextBox txtNote = (TextBox)FormView1.Row.FindControl("noteTextBox");
+        e.InputParameters["note"] = txtNote.Text;
+
+        currentDate.CurrentDate = startDateTime;
+        
+    }
+
+    
+    protected void ObjectDataSource2_Updating(object sender, ObjectDataSourceMethodEventArgs e)
+    {
+        //I thought this was done automagically...
+        //e.InputParameters["bookingid"] = (int)GridView2.DataKeys[GridView2.EditIndex].Value;
+        DateTime starttime;
+        DateTime endtime;
+        DateTime date;
+
+        //TODO: Add exception handling here
+        KMobile.Web.UI.WebControls.DateTimePicker dateTimePicker = (KMobile.Web.UI.WebControls.DateTimePicker)SelectedBookingFormView.Row.FindControl("DateTimePicker1");
+        date = dateTimePicker.Value;
+        DropDownList starttimeDropDownList = (DropDownList)SelectedBookingFormView.Row.FindControl("starttimeDropDownList");
+        starttime = DateTime.Parse(starttimeDropDownList.SelectedValue);
+        DropDownList endtimeDropDownList = (DropDownList)SelectedBookingFormView.Row.FindControl("endtimeDropDownList");
+        endtime = DateTime.Parse(endtimeDropDownList.SelectedValue);
+
+        DateTime startdatetime = new DateTime(date.Year, date.Month, date.Day, starttime.Hour, starttime.Minute, 0);
+        DateTime enddatetime = new DateTime(date.Year, date.Month, date.Day, endtime.Hour, endtime.Minute, 0);
+
+        e.InputParameters["startdatetime"] = startdatetime.ToString();
+        e.InputParameters["enddatetime"] = enddatetime.ToString();
+    }
+    protected void ObjectDataSource2_Updated(object sender, ObjectDataSourceStatusEventArgs e)
+    {
+        GridView1.DataBind();
+    }
+
+    
+    protected void ObjectDataSource2_Inserted(object sender, ObjectDataSourceStatusEventArgs e)
+    {
+        KMobile.Web.UI.WebControls.Lookup lupChoosePatient = (KMobile.Web.UI.WebControls.Lookup)FormView1.Row.FindControl("lupChoosePatient");
+        
+        GridView1.DataBind();    
+    }
+    
+    protected void FormView1_ItemInserted(object sender, FormViewInsertedEventArgs e)
+    {
+        e.KeepInInsertMode = true;
+
+        if (e.Exception != null)
+        {
+            InsertBookingExceptionLabel.Visible = true;
+            InsertBookingExceptionLabel.Text = "Det uppstod ett problem när bokningen skulle läggas till: \n";
+
+            if (e.Exception.InnerException != null)
+            {
+                Exception innerException = e.Exception.InnerException;
+
+                if (innerException is System.Data.Common.DbException)
+                    InsertBookingExceptionLabel.Text += "Databasen fungerar för närvarande inte som den ska.";
+                else if (innerException is System.ArgumentException)
+                {
+                    string paramName = ((ArgumentException)innerException).ParamName;
+                    InsertBookingExceptionLabel.Text += string.Concat("Värdet ", paramName, " är inte giltigt. Var god kontrollera bokningen.");
+                }
+                else if (innerException is NoNullAllowedException)
+                    InsertBookingExceptionLabel.Text += "Det saknas ett eller flera nödvändiga fält. Var god kontrollera bokningen.";
+                else if (innerException is ApplicationException)
+                    InsertBookingExceptionLabel.Text += innerException.Message;
+            }
+            e.ExceptionHandled = true;
+        }
+        else
+        {
+            //TODO: Bekräftelse att bokningen lades till?
+            CollapsiblePanel1.State = KMobile.Web.UI.WebControls.PanelState.Collapsed;
+
+            GridView1.DataBind();
+        }
+        
+        
+    }
+
+    protected void FormView1_ItemCommand(object sender, FormViewCommandEventArgs e)
+    {
+        if (e.CommandName == "Cancel")
+        {
+            CollapsiblePanel1.State = KMobile.Web.UI.WebControls.PanelState.Collapsed;
+     
+        }
+    }
+
+    protected void SelectedBookingFormView_ItemCommand(object sender, FormViewCommandEventArgs e)
+    {
+
+        if (e.CommandName == "Cancel")
+        {
+            SelectedBookingFormView.ChangeMode(FormViewMode.ReadOnly);
+        }
+    }
+
+
+
+    protected void SelectedBookingFormView_ItemCreated(object sender, EventArgs e)
+    {
+        DataRowView dataRowView = (DataRowView)SelectedBookingFormView.DataItem;
+
+        if (dataRowView == null)
+            return;
+
+        KMobile.Web.UI.WebControls.DateTimePicker DateTimePicker1 = (KMobile.Web.UI.WebControls.DateTimePicker)SelectedBookingFormView.Row.FindControl("DateTimePicker1");
+        
+        try
+        {
+            DateTimePicker1.Value = DateTime.Parse((string)dataRowView["startdatetime"]);
+        }
+        catch (Exception exception)
+        {
+            new ArgumentException("Det uppstod ett fel vid inläsning av bokningsdatumet:\n" + exception.Message);
+        }
+    }
+
+
+    /*
+     * When the user choose to edit the booking, the DateTimePicker control needs to be updated with the date
+     */
+    protected void SelectedBookingFormView_DataBound(object sender, EventArgs e)
+    {
+        if (SelectedBookingFormView.CurrentMode == FormViewMode.Edit)
+        {
+            DataRowView drv = (DataRowView)SelectedBookingFormView.DataItem;
+            KMobile.Web.UI.WebControls.DateTimePicker DateTimePicker1 = (KMobile.Web.UI.WebControls.DateTimePicker)SelectedBookingFormView.Row.FindControl("DateTimePicker1");
+
+            DateTimePicker1.Value = (DateTime)drv["startdatetime"];
+        }
+
+    }
+
+}
+

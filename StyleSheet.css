@@ -1,0 +1,88 @@
+﻿
+
+.dataGrid
+{
+    background-color:#B5C7DE;
+    color:Black;
+    font-family:Arial;
+    font:12pt Times New Roman;
+}
+
+.dataGridHeader
+{
+    background-color:Green;
+    font:12pt Arial;
+}
+
+.warning
+{
+    color:Red;
+    font-weight:bold;
+}
+
+.tableHeader
+{
+    background-color:Orange;
+    font:12pt Arial;
+    font-weight:bold;
+}
+
+.tableHelpHeader
+{
+    background-color:Teal;
+    font:14pt Arial;
+    font-weight:bold;
+}
+
+
+.smallHeader
+{
+    font:10pt Arial;
+    font-weight:bold;
+}
+
+
+.footerStyle
+{
+    background-color:Gray;
+    font:12pt Arial;
+    font-style:italic;
+    font-weight:bold;
+}
+
+.header
+{
+    font:14pt Arial;
+    font-weight:bold;
+}
+
+.collapsibleButton
+{
+    background-color:White;
+    border-color:#507CD1;
+    border-style:solid;
+    border-width:1px;
+    color:#284E98;
+    font-size:0.9em;
+    font-family:Verdana;
+}
+
+
+.myDatagrid td 
+{
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.collapsibleHeader
+{
+    font:14pt Arial;
+    font-weight:bold;
+}
+
+
+
+    
+    
+    
+

@@ -1,0 +1,1 @@
+C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\aspnet_compiler.exe -p "C:\Documents and Settings\Anders\Mina dokument\Visual Studio 2008\Websites\ReahabWeb" -v / C:\Staging

@@ -1,0 +1,438 @@
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="Bookings.aspx.cs" Inherits="_Default" MasterPageFile="~/MasterPage.master" Theme="SkinFile"  %>
+
+<%@ Register Assembly="InsGrid" Namespace="InsGrid" TagPrefix="cc3" %>
+
+<%@ Register Assembly="KMobile.Web" Namespace="KMobile.Web.UI.WebControls" TagPrefix="asp" %>
+
+<%@ Register Assembly="DTPicker" Namespace="DTPicker" TagPrefix="cc1" %>
+
+
+<%@ Register Assembly="MyWebDataGrid" Namespace="MyWebDataGrid" TagPrefix="cc2" %>
+
+
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    &nbsp; &nbsp;
+    &nbsp;
+    
+    
+        &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;
+    <asp:ObjectDataSource ID="ObjectDataSource1" runat="server" SelectMethod="GetBookingsByDate" TypeName="BookingsBLL" OnSelecting="ObjectDataSource1_Selecting">
+    <SelectParameters>
+        <asp:SessionParameter SessionField="CurrentDate" Name="date" Type="DateTime" />
+    </SelectParameters>        
+    </asp:ObjectDataSource>
+    
+    <asp:ObjectDataSource ID="ObjectDataSource2" runat="server" DeleteMethod="DeleteBooking"
+        InsertMethod="AddBooking" OldValuesParameterFormatString="{0}" SelectMethod="GetBookingsByBookingID"
+        TypeName="BookingsBLL" UpdateMethod="UpdateBooking" OnUpdated="ObjectDataSource2_Updated" OnUpdating="ObjectDataSource2_Updating" OnInserting="ObjectDataSource2_Inserting" OnInserted="ObjectDataSource2_Inserted">
+        <DeleteParameters>
+            <asp:Parameter Name="bookingid" Type="Int32" />
+        </DeleteParameters>
+        <UpdateParameters>
+            <asp:Parameter Name="bookingid" Type="Int32" />
+            <asp:Parameter Name="title" Type="String" />
+            <asp:Parameter Name="startdatetime" Type="DateTime" />
+            <asp:Parameter Name="enddatetime" Type="DateTime" />
+            <asp:Parameter Name="note" Type="String" />
+            <asp:Parameter Name="bookingtypeid" Type="Int32" />
+        </UpdateParameters>
+        <SelectParameters>
+            <asp:ControlParameter Name="bookingid" Type=int32 ControlID="GridView1" PropertyName="SelectedValue" />
+        </SelectParameters>
+        <InsertParameters>
+            <asp:Parameter Name="patientid" Type="Int32" />
+            <asp:Parameter Name="title" Type="String" />
+            <asp:Parameter Name="startdatetime" Type="DateTime" />
+            <asp:Parameter Name="enddatetime" Type="DateTime" />
+            <asp:Parameter Name="note" Type="String" />
+            <asp:Parameter Name="bookingtypeid" Type="Int32" />
+        </InsertParameters>
+    </asp:ObjectDataSource>
+    
+    <asp:CollapsiblePanel id="CollapsiblePanel1" runat="server" ExpandText="Ny bokning" CollapseText="-"
+        Height="200px" style="position: relative" Width="600px" ButtonType="button">
+<br />
+        <asp:FormView id="FormView1" runat="server" DataKeyNames="bookingid" DataSourceID="ObjectDataSource2"
+            style="position: relative; left: 0px; top: -23px;" DefaultMode="Insert" OnItemInserted="FormView1_ItemInserted" OnItemCommand="FormView1_ItemCommand">
+            
+            <insertitemtemplate>
+
+<table>
+<tr class=tableHeader>
+<td colspan="3">Lägg till en ny bokning</td>
+</tr>
+<tr>
+<td>Datum:</td>
+<td>Från kl.</td>
+<td>Till kl.</td>
+</tr>
+<tr>
+<td><asp:DateTimePicker id="DateTimePicker1" runat="server" AutoFormat="Colorful" Height="27px"
+                    style="position: relative" Width="183px"></asp:DateTimePicker></td>
+<td> <asp:DropDownList runat="server" id="starttimeDropDownList" /> -</td>                    
+<td><asp:DropDownList runat="server" id="endtimeDropDownList" /></td>
+</tr>
+                    
+<tr>
+<td>Typ</td>
+<td>Kommentar</td>
+<td></td>
+</tr>
+ 
+<tr>
+<td>
+<asp:DropDownList ID="drpBookingtype" runat=server DataSourceID="dsBookingtype" DataTextField="bookingtype" DataValueField="bookingtypeid"></asp:DropDownList>    
+<asp:ObjectDataSource ID="dsBookingtype" runat=server SelectMethod="GetAllBookingtypes" TypeName="BookingtypeBLL"></asp:ObjectDataSource>        
+</td>
+<td><asp:TextBox Text='<%# Bind("note") %>' runat="server" id="noteTextBox" /></td>
+</tr> 
+
+<tr>
+<td colspan="3">Patient</td>
+</tr>
+<tr>
+<td>Namn</td>
+<td></td>
+<td>Personnummer</td>
+</tr>
+<tr>
+<td><asp:TextBox ID="titleTextBox" Text='<%# Bind("title") %>' runat="server" ReadOnly=true></asp:TextBox>
+<asp:Lookup id="lupChoosePatient" runat="server" ButtonType="button" DialogHeight="600px"
+DialogLeft="" DialogNavigateUrl="~/ChoosePatient.aspx" DialogTop="" DialogWidth="800px"
+OnSelected="lupChoosePatient_Selected" style="position: relative">Välj</asp:Lookup></td>
+<td></td>
+<td><asp:TextBox runat="server" id="personnumberTextBox" ReadOnly=true/></td>
+</tr>
+
+<tr>
+<td colspan=3>
+Telefon 
+</td>
+</tr>
+<tr>
+<td>
+Hem
+</td>
+<td>
+Arbete
+</td>
+<td>
+Mobil
+</td>
+</tr>
+<tr>
+<td>
+ <asp:TextBox runat="server" id="homephoneTextBox" ReadOnly=true/>
+</td>
+<td>
+ <asp:TextBox runat="server" id="mobilephoneTextBox" ReadOnly=true/>
+</td>
+<td>
+ <asp:TextBox runat="server" id="workphoneTextBox" ReadOnly=true/>
+</td>
+</tr>
+<tr>
+<td colspan="3">Frikort:</td>
+</tr>
+<tr>
+<td><asp:TextBox runat="server" id="freecardTextBox" ReadOnly=true/></td>
+</tr>
+<tr>
+</tr>
+<tr>
+<td><asp:LinkButton runat="server" Text="Boka" ButtonType="Button" CommandName="Insert" id="InsertButton" CausesValidation="True" /> </td>
+<td><asp:LinkButton runat="server" Text="Avbryt" ButtonType="Button" CommandName="Cancel" id="InsertCancelButton" CausesValidation="False" /></td>
+<td></td>
+</tr>
+</table>
+
+</insertitemtemplate>
+            
+        </asp:FormView>
+       
+    <asp:Label ID="InsertBookingExceptionLabel" runat="server" EnableViewState=false Visible=false CssClass="warning" Text=""></asp:Label>
+    
+    </asp:CollapsiblePanel>
+    
+    
+    
+    <br />
+    
+    
+    
+    <table style="position: relative">
+        <tr>
+            <td>
+                <asp:Label ID="lblSelectedPatient" runat="server" Text=""></asp:Label>
+            </td>
+            
+        </tr>
+        <tr>
+            <td>
+            
+            <asp:FormView id="SelectedBookingFormView" runat="server" DataKeyNames="bookingid" DataSourceID="ObjectDataSource2"
+            style="position: relative" DefaultMode=ReadOnly OnItemCommand="SelectedBookingFormView_ItemCommand" onitemcreated="SelectedBookingFormView_ItemCreated" ondatabound="SelectedBookingFormView_DataBound">
+            
+ <itemtemplate>
+
+<table>
+<tr class=tableHeader>
+<td colspan="3">Vald bokning</td>
+</tr>
+<tr>
+<td>Datum:</td>
+<td>Från kl.</td>
+<td>Till kl.</td>
+</tr>
+<tr>
+<td><%#Eval("startdatetime", "{0:d}")%></td>
+<td><%#Eval("startdatetime", "{0:t}")%> -</td>                    
+<td><%#Eval("enddatetime", "{0:t}")%></td>
+</tr>
+                    
+<tr>
+<td>Typ</td>
+<td>Kommentar</td>
+<td></td>
+</tr>
+ 
+<tr>
+<td>
+<%#Eval("bookingtype")%></td>
+<td><%#Eval("note")%></td>
+</tr> 
+
+<tr>
+<td colspan="3">Patient</td>
+</tr>
+<tr>
+<td>Namn</td>
+<td></td>
+<td>Personnummer</td>
+</tr>
+<tr>
+<td><%#Eval("title")%></td>
+<td></td>
+<td><%#Eval("personnumber")%></td>
+</tr>
+
+<tr>
+<td colspan=3>
+Telefon 
+</td>
+</tr>
+<tr>
+<td>
+Hem
+</td>
+<td>
+Arbete
+</td>
+<td>
+Mobil
+</td>
+</tr>
+<tr>
+<td>
+ <%#Eval("homephone")%>
+</td>
+<td>
+ <%#Eval("workphone")%>
+</td>
+<td>
+ <%#Eval("mobilephone")%>
+</td>
+</tr>
+<tr>
+<td colspan="3">Frikort:</td>
+</tr>
+<tr>
+<td><%#Eval("freecarddate", "{0:d}")%></td>
+</tr>
+<tr>
+</tr>
+<tr>
+<td><asp:LinkButton runat="server" Text="Boka" ButtonType="Button" CommandName="Insert" id="InsertButton" CausesValidation="True" /> </td>
+<td><asp:LinkButton runat="server" Text="Avbryt" ButtonType="Button" CommandName="Cancel" id="InsertCancelButton" CausesValidation="False" /></td>
+<td></td>
+</tr>
+</table>
+
+</itemtemplate>
+
+            
+            <edititemtemplate>
+
+<table>
+<tr class=tableHeader>
+<td colspan="3">Ändra bokning</td>
+</tr>
+<tr>
+<td>Datum:</td>
+<td>Från kl.</td>
+<td>Till kl.</td>
+</tr>
+<tr>
+<td><asp:DateTimePicker id="DateTimePicker1" runat="server" AutoFormat="Colorful" Height="27px"
+                    style="position: relative" Width="183px"></asp:DateTimePicker></td>
+<td> <asp:DropDownList runat="server" id="startimeDropDownList" /> -</td>                    
+<td><asp:DropDownList runat="server" id="endtimeDropDownList" /></td>
+</tr>
+                    
+<tr>
+<td>Typ</td>
+<td>Kommentar</td>
+<td></td>
+</tr>
+ 
+<tr>
+<td>
+<asp:DropDownList ID="drpBookingtype" runat=server DataSourceID="dsBookingtype" DataTextField="bookingtype" DataValueField="bookingtypeid"></asp:DropDownList>    
+<asp:ObjectDataSource ID="dsBookingtype" runat=server SelectMethod="GetAllBookingtypes" TypeName="BookingtypeBLL"></asp:ObjectDataSource>        
+</td>
+<td><asp:TextBox Text='<%# Bind("note") %>' runat="server" id="noteTextBox" /></td>
+</tr> 
+
+<tr>
+<td colspan="3">Patient</td>
+</tr>
+<tr>
+<td>Namn</td>
+<td></td>
+<td>Personnummer</td>
+</tr>
+<tr>
+<td><%#Eval("title")%></td>
+<td></td>
+<td><%#Eval("personnumber")%></td>
+</tr>
+
+<tr>
+<td colspan=3>
+Telefon 
+</td>
+</tr>
+<tr>
+<td>
+Hem
+</td>
+<td>
+Arbete
+</td>
+<td>
+Mobil
+</td>
+</tr>
+<tr>
+<td>
+ <%#Eval("homephone")%>
+</td>
+<td>
+ <%#Eval("workphone")%>
+</td>
+<td>
+ <%#Eval("mobilephone")%>
+</td>
+</tr>
+<tr>
+<td colspan="3">Frikort:</td>
+</tr>
+<tr>
+<td><%#Eval("freecarddate", "{0:d}")%></td>
+</tr>
+<tr>
+</tr>
+<tr>
+<td><asp:LinkButton runat="server" Text="Boka" ButtonType="Button" CommandName="Insert" id="InsertButton" CausesValidation="True" /> </td>
+<td><asp:LinkButton runat="server" Text="Avbryt" ButtonType="Button" CommandName="Cancel" id="InsertCancelButton" CausesValidation="False" /></td>
+<td></td>
+</tr>
+</table>
+
+</edititemtemplate>
+        </asp:FormView>
+    
+    
+    <br />
+    
+    <br />
+    <table style="z-index: 102; left: 0px; position: relative; top: 0px; width:350px">
+        <tr>
+            <td style="width: 350px; height: 172px" colspan="3">
+            <cc2:HighlightDataGrid ID="GridView1" runat="server"
+            Height="1px"  Width="800px" OnSelectedIndexChanged="GridView1_SelectedIndexChanged" AutoGenerateColumns="False" DataSourceID="ObjectDataSource1" 
+            DataKeyNames="bookingid" EmptyDataText="Ingen tid är inbokad" RowForeColor="Green" RowHighlightColor=DarkOrange RowClickEventCommandName="select">
+            
+            <RowStyle Wrap=false />
+            
+                <Columns>   
+                    <asp:TemplateField HeaderText="Namn">     
+                        <ItemTemplate>
+                            <asp:Label ID="Label1" runat="server" Text='<%# Bind("title") %>'></asp:Label>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Persnr">
+                    <ItemTemplate>
+                            <asp:Label ID="lblPersonnumber" Runat="Server" Text='<%# Eval("personnumber") %>' />
+                    </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Telnr hem">
+                    <ItemTemplate>
+                            <asp:Label ID="lblHomephone" Runat="Server" Text='<%# Eval("homephone") %>' />
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                     <asp:TemplateField HeaderText="Fr&#229;n kl.">
+                        <ItemTemplate>
+                            <asp:Label ID="lblStarttime" Runat="Server" Text='<%# Eval("startdatetime", "{0:t}") %>' />
+                        </ItemTemplate>
+                        </asp:TemplateField>
+                        
+                        <asp:TemplateField HeaderText="Till kl.">
+                        <ItemTemplate>
+                            <asp:Label ID="lblEndtime" Runat="Server" Text='<%# Eval("enddatetime", "{0:t}") %>' />
+                        </ItemTemplate> 
+                        </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Typ">    
+                        <ItemTemplate>
+                            <asp:Label ID="Label2" runat="server" Text='<%# Bind("bookingtype") %>'></asp:Label>
+                        
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Kommentar">
+                        <ItemTemplate>
+                            <asp:Label ID="Label3" runat="server" Text='<%# Bind("note") %>'></asp:Label>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+        </cc2:HighlightDataGrid>&nbsp;
+            
+        </tr>
+        <tr>
+            <td>
+                &nbsp;<asp:Button ID="PreviousDay" runat="server" 
+            Text="<" Width="28px" OnClick="PreviousDay_Click" style="left: 42px; position: relative; top: 0px" />
+            <asp:Button ID="btnPreMonth" runat="server" 
+            Text="<<" Width="28px" OnClick="btnPreMonth_Click" style="left: -25px; position: relative; top: 0px" /></td>
+            <td align="center">
+            <asp:Label ID="LabelDate" runat="server"
+            Text="Label" Width="80px"></asp:Label>&nbsp;
+            </td>
+            <td>
+            <asp:Button ID="NextDay" runat="server"
+            Text=">" Width="28px" OnClick="NextDay_Click" />
+                <asp:Button ID="btnNxtMonth" runat="server" 
+            Text=">>" Width="28px" OnClick="btnNxtMonth_Click" style="left: 6px; position: relative; top: 0px" /></td>
+        </tr>
+        <tr>
+            <td style="height: 21px">
+            </td>
+            <td style="width: 142px; height: 21px">
+            </td>
+            <td style="width: 42px; height: 21px">
+            </td>
+        </tr>
+    </table>
+    
+    
+    
+</asp:Content>
